@@ -1,3 +1,4 @@
+
 # PowerShell Script: AAD and AD Device Cleanup
 
 ## Author
@@ -39,4 +40,45 @@ To use this script, ensure you have the required modules installed. The script w
 Run the script with the necessary permissions. Here’s an example of how to execute the script:
 
 ```powershell
-.\YourScriptName.ps1 [-visual] [-log] "DRIVE:"
+.\EnviromentCleanUp.ps1 [-visual] [-log] "DRIVE:"
+```
+
+### Example Commands
+
+1. **View Duplicates in AAD with GridView**:
+    ```powershell
+    .\EnviromentCleanUp.ps1 -visual
+    ```
+
+2. **Log Cleanup Activities to a Specific Path**:
+    ```powershell
+    .\EnviromentCleanUp.ps1 -log "C:\Logs"
+    ```
+
+## Functionality Overview
+
+### Modules
+
+- **Microsoft.Graph.Intune**: Used to interact with Intune and manage AAD devices.
+- **ActiveDirectory**: Provides functions for interacting with on-premises AD.
+
+### Key Functions
+
+- **Get-OUByFilter**: Retrieves Organizational Units (OUs) based on specific filters.
+- **ConnectMGGraphApp**: Establishes a connection to the Microsoft Graph API using application credentials.
+- **CreateAutoPilotDevicePrefix**: Generates prefixes for autopilot devices based on AD structure.
+- **CheckAAD**: Cleans up duplicate AAD devices, removing all but the latest synchronized device.
+- **CheckAD**: Checks for AD devices not present in AAD and deletes them if they don't match the autopilot naming convention.
+- **Write-Log**: Logs messages to a specified file for auditing purposes.
+
+## Logging
+
+The script logs its operations to a specified file or defaults to the system drive if no path is provided.
+
+## License
+
+This project is licensed under the [Custom License](LICENSE). Redistribution of this script in a commercial product or paid software is not permitted.
+
+## Disclaimer
+
+Use this script at your own risk. The author is not responsible for any damage caused by this script.
