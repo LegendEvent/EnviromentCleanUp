@@ -1,21 +1,23 @@
-MIT License
+# Custom License
 
-Copyright (c) 2024 LegendEvent
+This script is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this script.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+## Permissions
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+- **Use**: You may use the script for personal, educational, and internal business purposes.
+- **Modify**: You are free to modify the script for your own use.
+- **Distribute**: You may distribute the original or modified versions of the script, provided that you include this license.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+## Restrictions
+
+- **No Commercial Use**: You may not sell, sublicense, or distribute this script or any modified version in any form that requires a payment.
+- **Attribution**: You must provide attribution to the original author in any distributed version of this script.
+
+## Conditions
+
+- The original author retains all copyright to the script.
+- This license does not grant you any rights to any trademark, service mark, or logo of the author.
+
+## Disclaimer
+
+This script is provided without warranty of any kind. The author is not responsible for any direct or indirect damages or losses caused by the use of this script.
