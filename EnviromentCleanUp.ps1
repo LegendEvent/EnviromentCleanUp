@@ -15,7 +15,7 @@
 	-log: choose a path where you want to save the log file, if not used it will save it in $($ENV:SystemDrive)\CleanUp.log
 	
 .Version
-	1.0
+	1.1
     
 #>
 
@@ -154,7 +154,7 @@ function CheckAAD {
         $table
     )
 
-    $counter++
+    $counter = 0
     foreach ($group in $duplicates) {
         # Sortiere die Geräte nach LastSyncDateTime absteigend, um das neueste Gerät zu finden
         $sortedDevices = $group.Group | Sort-Object -Property LastSyncDateTime -Descending
