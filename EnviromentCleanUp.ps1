@@ -154,7 +154,6 @@ function CheckAAD {
         $table
     )
 
-    $counter = 0
     foreach ($group in $duplicates) {
         # Sortiere die Geräte nach LastSyncDateTime absteigend, um das neueste Gerät zu finden
         $sortedDevices = $group.Group | Sort-Object -Property LastSyncDateTime -Descending
@@ -166,33 +165,36 @@ function CheckAAD {
         foreach ($device in $devicesToDelete) {
             # Lösche das Gerät in Intune
             Write-Log -message "AAD: Deleting Device: $($device.DeviceName) ID: $($device.Id) Serialnumber: $($device.SerialNumber)"
-            try{
-                Remove-MgDeviceManagementManagedDevice -ManagedDeviceId $device.Id -confirm:$false -ErrorAction Stop
+            try {
+                Remove-MgDeviceManagementManagedDevice -ManagedDeviceId $device.Id -confirm:$false -ErrorAction Stop -WhatIf
                 Write-Log -type "INFO" -message "AAD: Deleting Device: $($device.DeviceName) is deleted"
-            }catch{
+            }
+            catch {
                 Write-Log -type "ERROR" -message "AAD: Deleting Device: $($device.DeviceName) was NOT deleted"
             }
             # Überprüfe, ob das Gerät auch im AD existiert und lösche es
             $computer = Get-ADComputer "$($device.DeviceName)" | Where-Object { $_.Name -eq $device.DeviceName } -ErrorAction SilentlyContinue
             if ($computer) {
                 Write-Log -message "AD: Deleting Device: $($computer.Name) in $($computer.DistinguishedName)" -ErrorAction SilentlyContinue
-                try{
-                    Remove-ADComputer -Identity $computer.DistinguishedName -Confirm:$false -ErrorAction Stop
-                }catch{
-                    Remove-ADObject -Identity $computer.DistinguishedName -Confirm:$false -ErrorAction Stop
-                }finally{
-                    if((Get-Adcomputer -Identity $computer.DistinguishedName -Confirm:$false))
-                    {
-                        Write-Log -type "ERROR" -message "AD: Device $($device.DeviceName) was NOT deleted" 
-                    }else{
-                        Write-Log -type "INFO" -message "AD: Device $($device.DeviceName) is deleted" 
+                try {
+                    Remove-ADComputer -Identity "$($computer.DistinguishedName)" -Confirm:$false -ErrorAction Stop -WhatIf
+                }
+                catch {
+                    Remove-ADObject -Identity "$($computer.DistinguishedName)" -Recursive -Confirm:$false -ErrorAction Stop -WhatIf
+                }
+                finally {
+                    try {
+                        Get-Adcomputer -Identity $computer.DistinguishedName -ErrorAction Stop
+                        Write-Log -type "ERROR" -message "AD: Device $($computer.Name) was NOT deleted" 
+                    }
+                    catch {
+                        Write-Log -type "INFO" -message "AD: Device $($computer.Name) is deleted" 
                     }
                 }
             }
-            $counter++
         }
     }
-    return $counter
+    return "AAD Check completed"
 }
 
 function CheckAD {
@@ -201,7 +203,6 @@ function CheckAD {
         $aadDevices
     )
 
-    $counter = 0
     foreach ($computer in $adDevices) {
         $computerName = $computer.Name
         $matchingDevice = $aadDevices | Where-Object { $_.DeviceName -eq $computerName }
@@ -211,22 +212,24 @@ function CheckAD {
         }
         else {
             Write-Log -message "AD: Deleting Device: $($computer.Name) in $($computer.DistinguishedName)"
-            try{
-                Remove-ADComputer -Identity $computer.DistinguishedName -Confirm:$false -ErrorAction Stop
-            }catch{
-                Remove-ADObject -Identity $computer.DistinguishedName -Confirm:$false -ErrorAction Stop
-            }finally{
-                if((Get-Adcomputer -Identity $computer.DistinguishedName -Confirm:$false))
-                {
-                    Write-Log -type "ERROR" -message "AD: Device $($device.DeviceName) was NOT deleted" 
-                }else{
-                    Write-Log -type "INFO" -message "AD: Device $($device.DeviceName) is deleted" 
+            try {
+                Remove-ADComputer -Identity "$($computer.DistinguishedName)" -Confirm:$false -ErrorAction Stop
+            }
+            catch {
+                Remove-ADObject -Identity "$($computer.DistinguishedName)" -Recursive -Confirm:$false -ErrorAction Stop
+            }
+            finally {
+                try {
+                    Get-Adcomputer -Identity $computer.DistinguishedName -ErrorAction Stop
+                    Write-Log -type "ERROR" -message "AD: Device $($computer.Name) was NOT deleted" 
                 }
-                $counter ++
+                catch {
+                    Write-Log -type "INFO" -message "AD: Device $($computer.Name) is deleted" 
+                }
             }
         }
     }
-    return $counter
+    return "AD Check completed"
 }
 
 function Write-Log {
