@@ -165,18 +165,21 @@ function CheckAAD {
     
         foreach ($device in $devicesToDelete) {
             # Lösche das Gerät in Intune
-            $counter++
             Write-Log -message "AAD: Deleting Device: $($device.DeviceName) ID: $($device.Id) Serialnumber: $($device.SerialNumber)"
-            Remove-MgDeviceManagementManagedDevice -ManagedDeviceId $device.Id -confirm:$false
-        
+            try{
+                Remove-MgDeviceManagementManagedDevice -ManagedDeviceId $device.Id -confirm:$false -ErrorAction Stop
+                Write-Log -type "INFO" -message "AAD: Deleting Device: $($device.DeviceName) is deleted"
+            }catch{
+                Write-Log -type "ERROR" -message "AAD: Deleting Device: $($device.DeviceName) was NOT deleted"
+            }
             # Überprüfe, ob das Gerät auch im AD existiert und lösche es
             $computer = Get-ADComputer "$($device.DeviceName)" | Where-Object { $_.Name -eq $device.DeviceName } -ErrorAction SilentlyContinue
             if ($computer) {
                 Write-Log -message "AD: Deleting Device: $($computer.Name) in $($computer.DistinguishedName)" -ErrorAction SilentlyContinue
                 try{
-                    Remove-ADComputer -Identity $computer.DistinguishedName -Confirm:$false
+                    Remove-ADComputer -Identity $computer.DistinguishedName -Confirm:$false -ErrorAction Stop
                 }catch{
-                    Remove-ADObject -Identity $computer.DistinguishedName -Confirm:$false
+                    Remove-ADObject -Identity $computer.DistinguishedName -Confirm:$false -ErrorAction Stop
                 }finally{
                     if((Get-Adcomputer -Identity $computer.DistinguishedName -Confirm:$false))
                     {
@@ -186,6 +189,7 @@ function CheckAAD {
                     }
                 }
             }
+            $counter++
         }
     }
     return $counter
@@ -208,9 +212,9 @@ function CheckAD {
         else {
             Write-Log -message "AD: Deleting Device: $($computer.Name) in $($computer.DistinguishedName)"
             try{
-                Remove-ADComputer -Identity $computer.DistinguishedName -Confirm:$false
+                Remove-ADComputer -Identity $computer.DistinguishedName -Confirm:$false -ErrorAction Stop
             }catch{
-                Remove-ADObject -Identity $computer.DistinguishedName -Confirm:$false
+                Remove-ADObject -Identity $computer.DistinguishedName -Confirm:$false -ErrorAction Stop
             }finally{
                 if((Get-Adcomputer -Identity $computer.DistinguishedName -Confirm:$false))
                 {
@@ -241,7 +245,7 @@ function Write-Log {
 
 
 #region MAIN
-ConnectMGGraphApp
+ConnectMGGraphApp -tenantId "YOUR TENANT ID" -Client_Id "YOUR APP CLIENT_ID" -Client_Secret "YOUR APP CLIENT SECRET"
 
 #region variables
 $domain = Get-WmiObject -Namespace root\cimv2 -Class Win32_ComputerSystem | Select-Object -Expand Domain
