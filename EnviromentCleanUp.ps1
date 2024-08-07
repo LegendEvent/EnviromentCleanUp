@@ -11,7 +11,7 @@
 	For deletion of autopilot devices you will need the prefix, so only these are deleted in this script that happens in CreateAutoPilotDevicePrefix, but if your AD and you Autopilotprefix guidelines is not build like mine it wont work
 
 .PARAMETERS
-    -visual: shows an GridView for AAD Devices with duplicated serialnumbers
+    	-visual: shows an GridView for AAD Devices with duplicated serialnumbers
 	-log: choose a path where you want to save the log file, if not used it will save it in $($ENV:SystemDrive)\CleanUp.log
 	
 .Version
@@ -167,13 +167,24 @@ function CheckAAD {
             # Lösche das Gerät in Intune
             $counter++
             Write-Log -message "AAD: Deleting Device: $($device.DeviceName) ID: $($device.Id) Serialnumber: $($device.SerialNumber)"
-            Remove-MgDeviceManagementManagedDevice -ManagedDeviceId $device.Id -confirm:$false 
+            Remove-MgDeviceManagementManagedDevice -ManagedDeviceId $device.Id -confirm:$false
         
             # Überprüfe, ob das Gerät auch im AD existiert und lösche es
             $computer = Get-ADComputer "$($device.DeviceName)" | Where-Object { $_.Name -eq $device.DeviceName } -ErrorAction SilentlyContinue
             if ($computer) {
                 Write-Log -message "AD: Deleting Device: $($computer.Name) in $($computer.DistinguishedName)" -ErrorAction SilentlyContinue
-                Remove-ADComputer -Identity $computer.DistinguishedName -Confirm:$false 
+                try{
+                    Remove-ADComputer -Identity $computer.DistinguishedName -Confirm:$false
+                }catch{
+                    Remove-ADObject -Identity $computer.DistinguishedName -Confirm:$false
+                }finally{
+                    if((Get-Adcomputer -Identity $computer.DistinguishedName -Confirm:$false))
+                    {
+                        Write-Log -type "ERROR" -message "AD: Device $($device.DeviceName) was NOT deleted" 
+                    }else{
+                        Write-Log -type "INFO" -message "AD: Device $($device.DeviceName) is deleted" 
+                    }
+                }
             }
         }
     }
@@ -196,8 +207,19 @@ function CheckAD {
         }
         else {
             Write-Log -message "AD: Deleting Device: $($computer.Name) in $($computer.DistinguishedName)"
-            Remove-ADComputer -Identity $computer.DistinguishedName -Confirm:$false 
-            $counter ++
+            try{
+                Remove-ADComputer -Identity $computer.DistinguishedName -Confirm:$false
+            }catch{
+                Remove-ADObject -Identity $computer.DistinguishedName -Confirm:$false
+            }finally{
+                if((Get-Adcomputer -Identity $computer.DistinguishedName -Confirm:$false))
+                {
+                    Write-Log -type "ERROR" -message "AD: Device $($device.DeviceName) was NOT deleted" 
+                }else{
+                    Write-Log -type "INFO" -message "AD: Device $($device.DeviceName) is deleted" 
+                }
+                $counter ++
+            }
         }
     }
     return $counter
